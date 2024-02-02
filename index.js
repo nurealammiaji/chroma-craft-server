@@ -37,6 +37,12 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
+        const courseCollection = client.db('chromaCraft').collection('courses');
+        const categoryCollection = client.db('chromaCraft').collection('categories');
+        const reviewCollection = client.db('chromaCraft').collection('reviews');
+        const userCollection = client.db('chromaCraft').collection('users');
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
