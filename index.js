@@ -38,7 +38,8 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
-        const courseCollection = client.db('chromaCraft').collection('courses');
+        const classCollection = client.db('chromaCraft').collection('classes');
+        const instructorCollection = client.db('chromaCraft').collection('instructors');
         const categoryCollection = client.db('chromaCraft').collection('categories');
         const reviewCollection = client.db('chromaCraft').collection('reviews');
         const userCollection = client.db('chromaCraft').collection('users');
