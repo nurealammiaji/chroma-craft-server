@@ -36,7 +36,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        client.connect();
 
         const classCollection = client.db('chromaCraft').collection('classes');
         const instructorCollection = client.db('chromaCraft').collection('instructors');
@@ -65,10 +65,19 @@ async function run() {
             res.send(result);
         })
 
+        // Users API
+        app.get("/users", async (req, res) => {
+            const cursor = userCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
+    }
+
+    finally {
         // Ensures that the client will close when you finish/error
         // await client.close();
     }
