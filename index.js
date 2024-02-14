@@ -1,6 +1,6 @@
 require('dotenv').config();
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const app = express();
@@ -91,6 +91,21 @@ async function run() {
                 const result = await userCollection.insertOne(user);
                 res.send(result);
             }
+        })
+
+        app.patch("/users/:id", async (req, res) => {
+            const id = req.params.id;
+            const user = req.body;
+            const query = { _id: new ObjectId(id) };
+            const updateUser = {
+                $set: {
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                }
+            }
+            const result = await userCollection(query, updateUser);
+            res.send(result);
         })
 
         // Send a ping to confirm a successful connection
