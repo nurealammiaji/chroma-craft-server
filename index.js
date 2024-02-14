@@ -72,6 +72,13 @@ async function run() {
             res.send(result);
         })
 
+        app.get("/users/:email", async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await userCollection.findOne(query);
+            res.send(result);
+        })
+
         app.post("/users", async (req, res) => {
             const user = req.body;
             const email = user.email;
@@ -79,12 +86,10 @@ async function run() {
             const find = await userCollection.findOne(query);
             if (find) {
                 res.send("User Already Exist !!");
-                console.log("User Already Exist !!");
             }
             else {
                 const result = await userCollection.insertOne(user);
                 res.send(result);
-                console.log(result);
             }
         })
 
