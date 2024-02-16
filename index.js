@@ -51,6 +51,13 @@ async function run() {
             res.send(result);
         })
 
+        // Reviews API
+        app.get("/reviews", async (req, res) => {
+            const cursor = reviewCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Classes API
         app.get("/classes", async (req, res) => {
             const cursor = classCollection.find();
@@ -85,7 +92,7 @@ async function run() {
             const query = { email: email };
             const find = await userCollection.findOne(query);
             if (find) {
-                res.send("User Already Exist !!");
+                res.send({ message: "User Already Exist !!" });
             }
             else {
                 const result = await userCollection.insertOne(user);
