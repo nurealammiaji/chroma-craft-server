@@ -72,6 +72,15 @@ async function run() {
             res.send(result);
         })
 
+        // Instructors Classes API
+        app.get("/instructors/classes", async (req, res) => {
+            const email = req.query.email;
+            const query = { instructor_email: email };
+            const cursor = classCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Users API
         app.get("/users", async (req, res) => {
             const cursor = userCollection.find();
