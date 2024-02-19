@@ -81,6 +81,15 @@ async function run() {
             res.send(result);
         })
 
+        // Students API
+        app.get("/students", async (req, res) => {
+            const role = "student";
+            const query = { role: role };
+            const cursor = userCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Users API
         app.get("/users", async (req, res) => {
             const cursor = userCollection.find();
