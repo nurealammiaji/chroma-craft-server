@@ -77,6 +77,15 @@ async function run() {
             res.send(result);
         })
 
+        // Enrolled Class API
+        app.get("/enrolled", async (req, res) => {
+            const email = req.query.email;
+            const query = { student_email: email };
+            const cursor = enrolledCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Instructors API
         app.get("/instructors", async (req, res) => {
             const cursor = instructorCollection.find();
