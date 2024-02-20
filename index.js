@@ -39,6 +39,8 @@ async function run() {
         client.connect();
 
         const classCollection = client.db('chromaCraft').collection('classes');
+        const selectedCollection = client.db('chromaCraft').collection('selected');
+        const enrolledCollection = client.db('chromaCraft').collection('enrolled');
         const instructorCollection = client.db('chromaCraft').collection('instructors');
         const categoryCollection = client.db('chromaCraft').collection('categories');
         const reviewCollection = client.db('chromaCraft').collection('reviews');
@@ -61,6 +63,16 @@ async function run() {
         // Classes API
         app.get("/classes", async (req, res) => {
             const cursor = classCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // Selected Class API
+        app.get("/selected", async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query = { student_email: email };
+            const cursor = selectedCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         })
