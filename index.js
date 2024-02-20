@@ -86,6 +86,19 @@ async function run() {
             res.send(result);
         })
 
+        app.post("/enrolled", async (req, res) => {
+            const order = req.body;
+            const query = { course_id: order.course_id };
+            const find = await enrolledCollection.findOne(query);
+            if (find) {
+                res.send({ message: "Already Enrolled" });
+            }
+            else {
+                const result = await enrolledCollection.insertOne(order);
+                res.send(result);
+            }
+        })
+
         // Instructors API
         app.get("/instructors", async (req, res) => {
             const cursor = instructorCollection.find();
