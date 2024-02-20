@@ -77,6 +77,19 @@ async function run() {
             res.send(result);
         })
 
+        app.post("/selected", async (req, res) => {
+            const select = req.body;
+            const query = { course_id: select.course_id };
+            const find = await selectedCollection.findOne(query);
+            if (find) {
+                res.send({ message: "Already Selected" });
+            }
+            else {
+                const result = await selectedCollection.insertOne(select);
+                res.send(result);
+            }
+        })
+
         // Enrolled Class API
         app.get("/enrolled", async (req, res) => {
             const email = req.query.email;
@@ -87,14 +100,14 @@ async function run() {
         })
 
         app.post("/enrolled", async (req, res) => {
-            const order = req.body;
-            const query = { course_id: order.course_id };
+            const enroll = req.body;
+            const query = { course_id: enroll.course_id };
             const find = await enrolledCollection.findOne(query);
             if (find) {
                 res.send({ message: "Already Enrolled" });
             }
             else {
-                const result = await enrolledCollection.insertOne(order);
+                const result = await enrolledCollection.insertOne(enroll);
                 res.send(result);
             }
         })
