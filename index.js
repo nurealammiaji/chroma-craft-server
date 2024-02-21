@@ -90,6 +90,14 @@ async function run() {
             console.log("result: ", result);
         })
 
+        app.delete("/selected/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: new ObjectId(id) };
+            const result = await selectedCollection.deleteOne(query);
+            res.send(result);
+        })
+
         // Enrolled Class API
         app.get("/enrolled", async (req, res) => {
             const email = req.query.email;
