@@ -70,7 +70,6 @@ async function run() {
         // Selected Class API
         app.get("/selected", async (req, res) => {
             const email = req.query.email;
-            console.log(email);
             const query = { student_email: email };
             const cursor = selectedCollection.find(query);
             const result = await cursor.toArray();
@@ -87,12 +86,10 @@ async function run() {
             }
             const result = await selectedCollection.insertOne(order);
             res.send(result);
-            console.log("result: ", result);
         })
 
         app.delete("/selected/:id", async (req, res) => {
             const id = req.params.id;
-            console.log(id);
             const query = { _id: new ObjectId(id) };
             const result = await selectedCollection.deleteOne(query);
             res.send(result);
@@ -109,16 +106,13 @@ async function run() {
 
         app.post("/enrolled", async (req, res) => {
             const order = req.body;
-            console.log("order: ", order);
             const query = { class_id: order.class_id };
             const find = await enrolledCollection.findOne(query);
-            console.log(find);
             if (find) {
                 return res.status(406).send({ error: true, message: "Already Enrolled !!" });
             }
             const result = await enrolledCollection.insertOne(order);
             res.send(result);
-            console.log("result: ", result);
         })
 
         // Instructors API
