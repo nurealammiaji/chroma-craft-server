@@ -78,16 +78,16 @@ async function run() {
         })
 
         app.post("/selected", async (req, res) => {
-            const select = req.body;
-            const query = { course_id: select.course_id };
+            const order = req.body;
+            console.log("order :", order.class_id);
+            const query = { class_id: order.class_id };
             const find = await selectedCollection.findOne(query);
             if (find) {
-                res.send({ message: "Already Selected" });
+                return res.status(406).send({ error: true, message: "Already Selected !!" });
             }
-            else {
-                const result = await selectedCollection.insertOne(select);
-                res.send(result);
-            }
+            const result = await selectedCollection.insertOne(order);
+            res.send(result);
+            console.log("result: ", result);
         })
 
         // Enrolled Class API
@@ -100,16 +100,17 @@ async function run() {
         })
 
         app.post("/enrolled", async (req, res) => {
-            const enroll = req.body;
-            const query = { course_id: enroll.course_id };
+            const order = req.body;
+            console.log("order: ", order);
+            const query = { class_id: order.class_id };
             const find = await enrolledCollection.findOne(query);
+            console.log(find);
             if (find) {
-                res.send({ message: "Already Enrolled" });
+                return res.status(406).send({ error: true, message: "Already Enrolled !!" });
             }
-            else {
-                const result = await enrolledCollection.insertOne(enroll);
-                res.send(result);
-            }
+            const result = await enrolledCollection.insertOne(order);
+            res.send(result);
+            console.log("result: ", result);
         })
 
         // Instructors API
@@ -157,12 +158,10 @@ async function run() {
             const query = { email: email };
             const find = await userCollection.findOne(query);
             if (find) {
-                res.send({ message: "User Already Exist !!" });
+                return res.status(406).send({ error: true, message: "User Already Exist !!" });
             }
-            else {
-                const result = await userCollection.insertOne(user);
-                res.send(result);
-            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
         })
 
         app.patch("/users/:id", async (req, res) => {
