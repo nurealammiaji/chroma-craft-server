@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const app = express();
 
@@ -46,6 +47,26 @@ async function run() {
         const reviewCollection = client.db('chromaCraft').collection('reviews');
         const userCollection = client.db('chromaCraft').collection('users');
 
+        // Payment API
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
+            if (!price || price === undefined || price <= 0 || price === "NaN") {
+                res.send({ error: true, message: "Invalid Price !!" });
+                return;
+            }
+            else {
+                const amount = price * 100;
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: amount,
+                    currency: 'usd',
+                    payment_method_types: ['card'],
+                });
+                res.send({
+                    clientSecret: paymentIntent.client_secret,
+                });
+            }
+        })
+
         // Categories API
         app.get("/categories", async (req, res) => {
             const cursor = categoryCollection.find();
@@ -78,7 +99,6 @@ async function run() {
 
         app.post("/selected", async (req, res) => {
             const order = req.body;
-            console.log("order :", order.class_id);
             const query = { class_id: order.class_id };
             const find = await selectedCollection.findOne(query);
             if (find) {
