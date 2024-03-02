@@ -2,17 +2,20 @@ require('dotenv').config();
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const app = express();
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
-
+// Variables
 const port = process.env.PORT || 5000;
 const username = process.env.DB_USER;
 const password = process.env.DB_PASS;
+
+// Middlewares
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
     res.send("Chroma Craft Server");
@@ -50,12 +53,14 @@ async function run() {
         // Payment API
         app.post("/create-payment-intent", async (req, res) => {
             const { price } = req.body;
-            if (!price || price === undefined || price <= 0 || price === "NaN") {
+            const amount = Math.ceil(price * 100);
+            if (!price || price === undefined || price <= 0 || price === NaN) {
                 res.send({ error: true, message: "Invalid Price !!" });
+                console.log("Hitting If block :", price, amount);
                 return;
             }
             else {
-                const amount = price * 100;
+                console.log("Hitting Else block :", price, amount);
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: amount,
                     currency: 'usd',
@@ -111,7 +116,16 @@ async function run() {
         app.delete("/selected/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
+            console.log(query);
             const result = await selectedCollection.deleteOne(query);
+            res.send(result);
+            console.log(result);
+        })
+
+        app.delete("/selected", async (req, res) => {
+            const email = req.query.email;
+            const query = { student_email: email };
+            const result = await selectedCollection.deleteMany(query);
             res.send(result);
         })
 
@@ -126,12 +140,15 @@ async function run() {
 
         app.post("/enrolled", async (req, res) => {
             const order = req.body;
-            const query = { class_id: order.class_id };
-            const find = await enrolledCollection.findOne(query);
-            if (find) {
-                return res.status(406).send({ error: true, message: "Already Enrolled !!" });
-            }
-            const result = await enrolledCollection.insertOne(order);
+            console.log("Order Received: ", order);
+            const result = await enrolledCollection.insertMany(order);
+            res.send(result)
+        })
+
+        app.delete("/enrolled/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await enrolledCollection.deleteOne(query);
             res.send(result);
         })
 
