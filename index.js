@@ -140,21 +140,31 @@ async function run() {
 
         app.post("/enrolled", async (req, res) => {
             const order = req.body;
-            console.log("Order Received: ", order);
             const result = await enrolledCollection.insertMany(order);
             res.send(result)
         })
 
         app.delete("/enrolled/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
+            const query = { _id: id };
+            console.log(query);
             const result = await enrolledCollection.deleteOne(query);
             res.send(result);
+            console.log(result);
         })
 
         // Instructors API
         app.get("/instructors", async (req, res) => {
             const cursor = instructorCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.get("/instructors/classes/:id", async (req, res) => {
+            const id = parseInt(req.params.id);
+            console.log(id);
+            const query = { instructor_id: id };
+            const cursor = classCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         })
