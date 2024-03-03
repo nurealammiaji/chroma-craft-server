@@ -160,9 +160,16 @@ async function run() {
             res.send(result);
         })
 
-        app.get("/instructors/classes/:id", async (req, res) => {
+        app.get("/instructors/:id", async (req, res) => {
             const id = parseInt(req.params.id);
             console.log(id);
+            const query = { instructor_id: id };
+            const result = await instructorCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get("/instructors/classes/:id", async (req, res) => {
+            const id = parseInt(req.params.id);
             const query = { instructor_id: id };
             const cursor = classCollection.find(query);
             const result = await cursor.toArray();
