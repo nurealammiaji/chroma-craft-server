@@ -79,6 +79,14 @@ async function run() {
             res.send(result);
         })
 
+        app.get("/categories/:id", async (req, res) => {
+            const id = parseInt(req.params.id);
+            const query = { category_id: id };
+            const cursor = classCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
         // Reviews API
         app.get("/reviews", async (req, res) => {
             const cursor = reviewCollection.find();
@@ -162,7 +170,6 @@ async function run() {
 
         app.get("/instructors/:id", async (req, res) => {
             const id = parseInt(req.params.id);
-            console.log(id);
             const query = { instructor_id: id };
             const result = await instructorCollection.findOne(query);
             res.send(result);
