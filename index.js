@@ -82,6 +82,13 @@ async function run() {
         app.get("/categories/:id", async (req, res) => {
             const id = parseInt(req.params.id);
             const query = { category_id: id };
+            const result = await categoryCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get("/categories/classes/:id", async (req, res) => {
+            const id = parseInt(req.params.id);
+            const query = { category_id: id };
             const cursor = classCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
