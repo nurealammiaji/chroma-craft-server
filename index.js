@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
+const res = require('express/lib/response');
 const app = express();
 
 // Variables
@@ -49,8 +50,9 @@ async function run() {
         const categoryCollection = client.db('chromaCraft').collection('categories');
         const reviewCollection = client.db('chromaCraft').collection('reviews');
         const userCollection = client.db('chromaCraft').collection('users');
+        const paymentCollection = client.db('chromaCraft').collection('payment');
 
-        // Payment API
+        // Payment Intent API
         app.post("/create-payment-intent", async (req, res) => {
             const { price } = req.body;
             const amount = Math.ceil(price * 100);
@@ -70,6 +72,15 @@ async function run() {
                     clientSecret: paymentIntent.client_secret,
                 });
             }
+        })
+
+        // Payment API
+        app.get("/payment", async (req, res) => {
+            const email = req.query.email;
+            const query = { student_email: email };
+            const cursor = paymentCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
         })
 
         // Categories API
@@ -110,7 +121,7 @@ async function run() {
 
         app.get("/classes/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
+            const query = { _id: id };
             const result = await classCollection.findOne(query);
             res.send(result);
         })
