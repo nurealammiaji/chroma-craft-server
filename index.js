@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const res = require('express/lib/response');
+const req = require('express/lib/request');
 const app = express();
 
 // Variables
@@ -80,6 +81,12 @@ async function run() {
             const query = { student_email: email };
             const cursor = paymentCollection.find(query);
             const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.post("/payment", async (req, res) => {
+            const order = req.body;
+            const result = await paymentCollection.insertMany(order);
             res.send(result);
         })
 
@@ -168,6 +175,13 @@ async function run() {
             const query = { student_email: email };
             const cursor = enrolledCollection.find(query);
             const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.get("/enrolled/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { class_id: id };
+            const result = await enrolledCollection.findOne(query);
             res.send(result);
         })
 
