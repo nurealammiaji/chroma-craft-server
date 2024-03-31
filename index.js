@@ -59,11 +59,9 @@ async function run() {
             const amount = Math.ceil(price * 100);
             if (!price || price === undefined || price <= 0 || price === NaN) {
                 res.send({ error: true, message: "Invalid Price !!" });
-                console.log("Hitting If block :", price, amount);
                 return;
             }
             else {
-                console.log("Hitting Else block :", price, amount);
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: amount,
                     currency: 'usd',
@@ -88,6 +86,13 @@ async function run() {
             const order = req.body;
             const result = await paymentCollection.insertMany(order);
             res.send(result);
+        })
+
+        // JWT
+        app.get("/jwt", async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, secret, {expires: 1});
+            res.send(token);
         })
 
         // Categories API
@@ -133,6 +138,12 @@ async function run() {
             res.send(result);
         })
 
+        app.post("/classes", async(req, res) => {
+            const newClass = req.body;
+            const result = await classCollection.insertOne(newClass);
+            res.send(result);
+        })
+
         // Selected Class API
         app.get("/selected", async (req, res) => {
             const email = req.query.email;
@@ -156,10 +167,8 @@ async function run() {
         app.delete("/selected/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
-            console.log(query);
             const result = await selectedCollection.deleteOne(query);
             res.send(result);
-            console.log(result);
         })
 
         app.delete("/selected", async (req, res) => {
@@ -180,9 +189,19 @@ async function run() {
 
         app.get("/enrolled/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { class_id: id };
-            const result = await enrolledCollection.findOne(query);
-            res.send(result);
+            const email = req.query.email;
+            const query = { student_email: email };
+            const cursor = enrolledCollection.find(query);
+            const enrolled = await cursor.toArray();
+            if (enrolled.length > 0) {
+                const result = enrolled.find(item => item.class_id === id);
+                if (result) {
+                    res.send(true);
+                }
+                else {
+                    res.send(false);
+                }
+            }
         })
 
         app.post("/enrolled", async (req, res) => {
@@ -194,10 +213,8 @@ async function run() {
         app.delete("/enrolled/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: id };
-            console.log(query);
             const result = await enrolledCollection.deleteOne(query);
             res.send(result);
-            console.log(result);
         })
 
         // Instructors API
