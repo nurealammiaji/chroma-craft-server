@@ -5,8 +5,6 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
-const res = require('express/lib/response');
-const req = require('express/lib/request');
 const app = express();
 
 // Variables
@@ -291,6 +289,10 @@ async function run() {
                 $set: {
                     name: user.name,
                     email: user.email,
+                    phone: user.phone,
+                    image: user.image,
+                    gender: user.gender,
+                    dob: user.dob,
                     role: user.role,
                 }
             }
