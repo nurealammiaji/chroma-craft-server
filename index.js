@@ -89,7 +89,7 @@ async function run() {
         // JWT
         app.get("/jwt", async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, secret, {expires: 1});
+            const token = jwt.sign(user, secret, {expires: '1d'});
             res.send(token);
         })
 
@@ -151,13 +151,25 @@ async function run() {
             res.send(result);
         })
 
+        app.get("/selected/:id", async (req, res) => {
+            const id = req.params.id;
+            const email = req.query.email;
+            const query = { student_email: email };
+            const cursor = selectedCollection.find(query);
+            const selected = await cursor.toArray();
+            if (selected.length > 0) {
+                const result = selected.find(item => item.class_id === id);
+                if (result) {
+                    res.send(true);
+                }
+                else {
+                    res.send(false);
+                }
+            }
+        })
+
         app.post("/selected", async (req, res) => {
             const order = req.body;
-            const query = { class_id: order.class_id };
-            const find = await selectedCollection.findOne(query);
-            if (find) {
-                return res.status(406).send({ error: true, message: "Already Selected !!" });
-            }
             const result = await selectedCollection.insertOne(order);
             res.send(result);
         })
