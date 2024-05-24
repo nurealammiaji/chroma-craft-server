@@ -89,7 +89,7 @@ async function run() {
         // JWT
         app.get("/jwt", async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, secret, {expires: '1d'});
+            const token = jwt.sign(user, secret, { expires: '1d' });
             res.send(token);
         })
 
@@ -136,7 +136,7 @@ async function run() {
             res.send(result);
         })
 
-        app.post("/classes", async(req, res) => {
+        app.post("/classes", async (req, res) => {
             const newClass = req.body;
             const result = await classCollection.insertOne(newClass);
             res.send(result);
@@ -296,7 +296,9 @@ async function run() {
         app.patch("/users/:id", async (req, res) => {
             const id = req.params.id;
             const user = req.body;
+            console.log(user);
             const query = { _id: new ObjectId(id) };
+            console.log(query);
             const updateUser = {
                 $set: {
                     name: user.name,
@@ -307,9 +309,18 @@ async function run() {
                     dob: user.dob,
                     role: user.role,
                 }
-            }
-            const result = await userCollection(query, updateUser);
+            };
+            const result = await userCollection.updateOne(query, updateUser);
             res.send(result);
+            console.log(result);
+        })
+
+        app.delete("/users/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+            console.log(result);
         })
 
         // Send a ping to confirm a successful connection
