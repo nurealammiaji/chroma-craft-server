@@ -49,7 +49,7 @@ async function run() {
         const categoryCollection = client.db('chromaCraft').collection('categories');
         const reviewCollection = client.db('chromaCraft').collection('reviews');
         const userCollection = client.db('chromaCraft').collection('users');
-        const paymentCollection = client.db('chromaCraft').collection('payment');
+        const paymentCollection = client.db('chromaCraft').collection('payments');
 
         // Payment Intent API
         app.post("/create-payment-intent", async (req, res) => {
@@ -71,18 +71,52 @@ async function run() {
             }
         })
 
-        // Payment API
-        app.get("/payment", async (req, res) => {
+        // Payments API
+        app.get("/payments", async (req, res) => {
             const email = req.query.email;
-            const query = { student_email: email };
+            let query;
+            if (email) {
+                query = { student_email: email };
+            }
             const cursor = paymentCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
         })
 
-        app.post("/payment", async (req, res) => {
-            const order = req.body;
-            const result = await paymentCollection.insertMany(order);
+        app.post("/payments", async (req, res) => {
+            const payment = req.body;
+            console.log(payment);
+            const result = await paymentCollection.insertOne(payment);
+            res.send(result);
+        })
+
+        app.patch("/payments/:id", async (req, res) => {
+            const id = req.params.id;
+            const editedPayment = req.body;
+            const query = { _id: new ObjectId(id) };
+            const updatePayment = {
+                $set: {
+                    payment_status: editedPayment.payment_status,
+                    payment_trxID: editedPayment.payment_trxID,
+                    payment_amount: editedPayment.payment_amount,
+                    payment_currency: editedPayment.payment_currency,
+                    payment_info: editedPayment.payment_info,
+                    payment_method_id: editedPayment.payment_method_id,
+                    payment_method_type: editedPayment.payment_method_type,
+                    client_secret: editedPayment.client_secret,
+                    student_name: editedPayment.student_name,
+                    student_email: editedPayment.student_email,
+                    paid_classes: editedPayment.paid_classes
+                }
+            }
+            const result = await paymentCollection.updateOne(query, updatePayment);
+            res.send(result);
+        })
+
+        app.delete("/payments/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await paymentCollection.deleteOne(query);
             res.send(result);
         })
 
@@ -131,7 +165,7 @@ async function run() {
 
         app.get("/classes/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { _id: id };
+            const query = { _id: new ObjectId(id) };
             const result = await classCollection.findOne(query);
             res.send(result);
         })
@@ -139,6 +173,36 @@ async function run() {
         app.post("/classes", async (req, res) => {
             const newClass = req.body;
             const result = await classCollection.insertOne(newClass);
+            res.send(result);
+        })
+
+        app.patch("/classes/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const editedClass = req.body;
+            const updateClass = {
+                $set: {
+                    course_id: editedClass.course_id,
+                    title: editedClass.title,
+                    description: editedClass.description,
+                    instructor: classInfo?.instructor,
+                    instructor_id: editedClass.instructor_id,
+                    instructor_email: editedClass.instructor_email,
+                    instructor_image: editedClass.instructor_image,
+                    duration: editedClass.duration,
+                    price: editedClass.price,
+                    seat_capacity: editedClass.seat,
+                    enrolled: editedClass.enrolled,
+                    level: editedClass.level,
+                    rating: editedClass.rating,
+                    image: editedClass.image,
+                    category_id: editedClass.category_id,
+                    category_name: data?.category1,
+                    reviews: classInfo?.reviews,
+                    status: data?.status
+                }
+            };
+            const result = await classCollection.updateOne(query, updateClass);
             res.send(result);
         })
 
@@ -222,7 +286,7 @@ async function run() {
 
         app.delete("/enrolled/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { _id: id };
+            const query = { _id: new ObjectId(id) };
             const result = await enrolledCollection.deleteOne(query);
             res.send(result);
         })
