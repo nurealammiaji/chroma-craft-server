@@ -178,31 +178,40 @@ async function run() {
 
         app.patch("/classes/:id", async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
             const editedClass = req.body;
+            console.log(id, editedClass);
+            const query = { _id: new ObjectId(id) };
             const updateClass = {
                 $set: {
                     course_id: editedClass.course_id,
                     title: editedClass.title,
                     description: editedClass.description,
-                    instructor: classInfo?.instructor,
+                    instructor: editedClass.instructor,
                     instructor_id: editedClass.instructor_id,
                     instructor_email: editedClass.instructor_email,
                     instructor_image: editedClass.instructor_image,
                     duration: editedClass.duration,
                     price: editedClass.price,
-                    seat_capacity: editedClass.seat,
+                    seat_capacity: editedClass.seat_capacity,
                     enrolled: editedClass.enrolled,
                     level: editedClass.level,
                     rating: editedClass.rating,
                     image: editedClass.image,
                     category_id: editedClass.category_id,
-                    category_name: data?.category1,
-                    reviews: classInfo?.reviews,
-                    status: data?.status
+                    category_name: editedClass.category_name,
+                    reviews: editedClass.reviews,
+                    status: editedClass.status
                 }
             };
             const result = await classCollection.updateOne(query, updateClass);
+            res.send(result);
+            console.log(result);
+        })
+
+        app.delete("/classes/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await classCollection.deleteOne(query);
             res.send(result);
         })
 
