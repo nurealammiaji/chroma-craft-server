@@ -11,11 +11,28 @@ const app = express();
 const port = process.env.PORT || 5000;
 const username = process.env.DB_USER;
 const password = process.env.DB_PASS;
+const secret = process.env.JWT_SECRET;
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.json());
+
+const verifyJWT = (req, res, next) => {
+    const authorization = req.header('authorization');
+    const token = authorization.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ msg: 'No token, authorization denied' });
+    }
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, secret);
+            req.user = decoded.user;
+            next();
+        } catch (e) {
+            res.status(401).json({ msg: 'Token is not valid' });
+        }
+    }
+}
 
 app.get("/", (req, res) => {
     res.send("Chroma Craft Server");
@@ -50,6 +67,13 @@ async function run() {
         const reviewCollection = client.db('chromaCraft').collection('reviews');
         const userCollection = client.db('chromaCraft').collection('users');
         const paymentCollection = client.db('chromaCraft').collection('payments');
+
+        // JWT
+        app.post("/jwt", async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, secret, { expiresIn: '1d' });
+            res.send({ token });
+        })
 
         // Payment Intent API
         app.post("/create-payment-intent", async (req, res) => {
@@ -118,13 +142,6 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await paymentCollection.deleteOne(query);
             res.send(result);
-        })
-
-        // JWT
-        app.get("/jwt", async (req, res) => {
-            const user = req.body;
-            const token = jwt.sign(user, secret, { expires: '1d' });
-            res.send(token);
         })
 
         // Categories API
@@ -337,6 +354,23 @@ async function run() {
             const query = { role: role };
             const cursor = userCollection.find(query);
             const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.patch("/students/:id", verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const student = req.body;
+            const query = { _id: new ObjectId(id) };
+            const updateStudent = {
+                $set: {
+                    name: student.name,
+                    email: student.email,
+                    phone: student.phone,
+                    address: student.address,
+                    image: student.image
+                }
+            };
+            const result = await userCollection.updateOne(query, updateStudent);
             res.send(result);
         })
 
