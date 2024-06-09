@@ -2,9 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
-const bodyParser = require('body-parser');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
+const req = require('express/lib/request');
 const app = express();
 
 // Variables
@@ -109,7 +109,6 @@ async function run() {
 
         app.post("/payments", async (req, res) => {
             const payment = req.body;
-            console.log(payment);
             const result = await paymentCollection.insertOne(payment);
             res.send(result);
         })
@@ -196,7 +195,6 @@ async function run() {
         app.patch("/classes/:id", async (req, res) => {
             const id = req.params.id;
             const editedClass = req.body;
-            console.log(id, editedClass);
             const query = { _id: new ObjectId(id) };
             const updateClass = {
                 $set: {
@@ -222,7 +220,6 @@ async function run() {
             };
             const result = await classCollection.updateOne(query, updateClass);
             res.send(result);
-            console.log(result);
         })
 
         app.delete("/classes/:id", async (req, res) => {
@@ -317,6 +314,17 @@ async function run() {
             res.send(result);
         })
 
+        // Count Updating API
+        app.patch("/count", async (req, res) => {
+            const paidClassesIDs = req.body;
+            const objectIds = paidClassesIDs.map(id => new ObjectId(id));
+            const query = { _id: { $in: objectIds } };
+            const update = { $inc: { enrolled: 1 } };
+            const options = { multi: true };
+            const result = await classCollection.updateMany(query, update, options);
+            res.send(result);
+        })
+
         // Instructors API
         app.get("/instructors", async (req, res) => {
             const cursor = instructorCollection.find();
@@ -333,16 +341,6 @@ async function run() {
 
         app.get("/instructors/classes/:id", async (req, res) => {
             const id = parseInt(req.params.id);
-            const query = { instructor_id: id };
-            const cursor = classCollection.find(query);
-            const result = await cursor.toArray();
-            res.send(result);
-        })
-
-        // Instructors Classes API
-        app.get("/instructors/classes", async (req, res) => {
-            const email = req.query.email;
-            const query = { instructor_email: email };
             const cursor = classCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
@@ -403,9 +401,7 @@ async function run() {
         app.patch("/users/:id", async (req, res) => {
             const id = req.params.id;
             const user = req.body;
-            console.log(user);
             const query = { _id: new ObjectId(id) };
-            console.log(query);
             const updateUser = {
                 $set: {
                     name: user.name,
@@ -419,7 +415,6 @@ async function run() {
             };
             const result = await userCollection.updateOne(query, updateUser);
             res.send(result);
-            console.log(result);
         })
 
         app.delete("/users/:id", async (req, res) => {
@@ -427,7 +422,6 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await userCollection.deleteOne(query);
             res.send(result);
-            console.log(result);
         })
 
         // Send a ping to confirm a successful connection
