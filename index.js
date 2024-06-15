@@ -339,11 +339,54 @@ async function run() {
             res.send(result);
         })
 
+        app.get("/instructors/details/:email", async (req, res) => {
+            const email = req.params.email;
+            const query = { instructor_email: email };
+            const result = await instructorCollection.findOne(query);
+            res.send(result);
+        })
+
         app.get("/instructors/classes/:id", async (req, res) => {
             const id = parseInt(req.params.id);
+            const query = { instructor_id: id };
             const cursor = classCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
+        })
+
+        app.post("/instructors", async (req, res) => {
+            const newInstructor = req.body;
+            console.log(newInstructor);
+            const result = await instructorCollection.insertOne(newInstructor);
+            res.send(result);
+            console.log(result);
+        })
+
+        app.patch("/instructors", async (req, res) => {
+            const instructor = req.body;
+            const email = instructor.instructor_email;
+            console.log(instructor, email);
+            const query = { instructor_email: email };
+            const updateInstructor = {
+                $set: {
+                    instructor_id: instructor.instructor_id,
+                    instructor: instructor.instructor,
+                    instructor_email: instructor.instructor_email,
+                    instructor_image: instructor.instructor_image
+                }
+            };
+            const result = await instructorCollection.updateOne(query, updateInstructor);
+            res.send(result);
+            console.log(result);
+        })
+
+        app.delete("/instructors/:email", async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const query = { instructor_email: email };
+            const result = await instructorCollection.deleteOne(query);
+            res.send(result);
+            console.log(result);
         })
 
         // Students API
